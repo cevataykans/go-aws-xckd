@@ -20,6 +20,7 @@ type EventResponse struct {
 	Title     string `json:"title"`
 	URL       string `json:"url"`
 	Published string `json:"published"`
+	Fetched   bool   `json:"fetched"`
 }
 
 func main() {
