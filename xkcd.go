@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"context"
 
-	"github.com/cevataykans/aws-lambda-go/feed"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/cevataykans/go-aws-xckd/feed"
 )
 
 var (
@@ -22,5 +23,26 @@ type EventResponse struct {
 }
 
 func main() {
-	fmt.Println("Hello world!")
+	lambda.Start(LatestXKCD)
+}
+
+func LatestXKCD(ctx context.Context, req EventRequest) (EventResponse, error) {
+
+	resp := EventResponse{Title: "xkcd.com", URL: "https://xkcd.com/"}
+
+	if err := rssFeed.ParseURL(ctx, feedURL); err != nil {
+		return resp, err
+	}
+
+	switch items := rssFeed.Items(); {
+	case req.Previous && len(items) > 1:
+		resp.Title = items[1].Title
+		resp.URL = items[1].URL
+		resp.Published = items[1].Published
+	case len(items) > 0:
+		resp.Title = items[0].Title
+		resp.URL = items[0].URL
+		resp.Published = items[0].Published
+	}
+	return resp, nil
 }
